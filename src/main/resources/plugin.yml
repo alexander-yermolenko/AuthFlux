@@ -1,0 +1,14 @@
+name: AuthFlux
+version: '1.0'
+main: com.yermolenko.authflux.AuthFlux
+api-version: '1.21'
+authors: [Alexander Yermolenko]
+website: https://github.com/alexander-yermolenko
+description: Authentication and authorization plugin for Minecraft servers
+commands:
+  reg:
+    description: Register your account
+    usage: /<command> [password]
+  log:
+    description: Login to your account
+    usage: /<command> [password]

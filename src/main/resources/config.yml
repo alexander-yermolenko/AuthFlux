@@ -1,0 +1,15 @@
+# AuthFlux Configuration
+spawn-point:
+  world: "world"
+  x: 0.0
+  y: 64.0
+  z: 0.0
+  yaw: 0.0
+  pitch: 0.0
+
+database:
+  host: "localhost"
+  port: 5432
+  name: "authflux"
+  username: "postgres"
+  password: "password"
