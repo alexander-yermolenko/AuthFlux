@@ -8,8 +8,13 @@ spawn-point:
   pitch: 0.0
 
 database:
+  type: "postgresql" # Options: "mysql" or "postgresql"
   host: "localhost"
   port: 5432
   name: "authflux"
   username: "postgres"
   password: "password"
+
+password:
+  min-length: 4
+  max-length: 24

@@ -10,11 +10,8 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.Objects;
 
-
 public class AuthCommandExecutor implements CommandExecutor {
     private final AuthFlux plugin;
-    private static final int MIN_PASSWORD_LENGTH = 4;
-    private static final int MAX_PASSWORD_LENGTH = 24;
 
     public AuthCommandExecutor(AuthFlux plugin) {
         this.plugin = plugin;
@@ -29,6 +26,8 @@ public class AuthCommandExecutor implements CommandExecutor {
 
         DatabaseManager dbManager = plugin.getDatabaseManager();
         String uuid = player.getUniqueId().toString();
+        int minPasswordLength = plugin.getConfig().getInt("password.min-length", 4);
+        int maxPasswordLength = plugin.getConfig().getInt("password.max-length", 24);
 
         if (command.getName().equalsIgnoreCase("reg")) {
             if (args.length != 1) {
@@ -37,10 +36,10 @@ public class AuthCommandExecutor implements CommandExecutor {
             }
 
             String password = args[0];
-            if (password.length() < MIN_PASSWORD_LENGTH || password.length() > MAX_PASSWORD_LENGTH) {
+            if (password.length() < minPasswordLength || password.length() > maxPasswordLength) {
                 String message = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(plugin.getMessagesConfig().getString("password-length-invalid")))
-                        .replace("%min%", String.valueOf(MIN_PASSWORD_LENGTH))
-                        .replace("%max%", String.valueOf(MAX_PASSWORD_LENGTH));
+                        .replace("%min%", String.valueOf(minPasswordLength))
+                        .replace("%max%", String.valueOf(maxPasswordLength));
                 player.sendMessage(message);
                 return true;
             }
@@ -89,8 +88,8 @@ public class AuthCommandExecutor implements CommandExecutor {
 
     private void unfreezeAndTeleport(Player player, String uuid) {
         // Unfreeze player
-        player.removePotionEffect(PotionEffectType.JUMP_BOOST);
-        player.removePotionEffect(PotionEffectType.SLOWNESS);
+        player.removePotionEffect(PotionEffectType.JUMP);
+        player.removePotionEffect(PotionEffectType.SLOW);
         plugin.getLogger().info("Unfroze player " + player.getName());
 
         // Teleport to saved location

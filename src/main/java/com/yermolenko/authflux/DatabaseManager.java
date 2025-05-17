@@ -17,25 +17,72 @@ public class DatabaseManager {
     }
 
     public void initializeDatabase() throws SQLException {
-        // Explicitly load the PostgreSQL driver
-        try {
-            Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("PostgreSQL JDBC driver not found", e);
-        }
-
+        String dbType = plugin.getConfig().getString("database.type", "postgresql").toLowerCase();
         String host = plugin.getConfig().getString("database.host", "localhost");
-        int port = plugin.getConfig().getInt("database.port", 5432);
+        int port = plugin.getConfig().getInt("database.port", dbType.equals("mysql") ? 3306 : 5432);
         String database = plugin.getConfig().getString("database.name", "authflux");
         String username = plugin.getConfig().getString("database.username", "postgres");
         String password = plugin.getConfig().getString("database.password", "password");
-        String url = String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
+        String url;
+
+        // Step 1: Connect to the server (without specifying a database) to check/create the database
+        String serverUrl;
+        if (dbType.equals("mysql")) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("MySQL JDBC driver not found", e);
+            }
+            serverUrl = String.format("jdbc:mysql://%s:%d?useSSL=false&allowPublicKeyRetrieval=true", host, port);
+        } else if (dbType.equals("postgresql")) {
+            try {
+                Class.forName("org.postgresql.Driver");
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("PostgreSQL JDBC driver not found", e);
+            }
+            serverUrl = String.format("jdbc:postgresql://%s:%d/", host, port);
+        } else {
+            throw new SQLException("Invalid database type specified: " + dbType);
+        }
+
+        // Step 2: Check if the database exists and create it if it doesn't
+        try (Connection serverConn = DriverManager.getConnection(serverUrl, username, password)) {
+            String checkDbSql = dbType.equals("mysql") ?
+                    "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?" :
+                    "SELECT 1 FROM pg_database WHERE datname = ?";
+            try (PreparedStatement stmt = serverConn.prepareStatement(checkDbSql)) {
+                stmt.setString(1, database);
+                ResultSet rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    // Database doesn't exist, create it
+                    String createDbSql = dbType.equals("mysql") ?
+                            "CREATE DATABASE " + database :
+                            "CREATE DATABASE " + database;
+                    try (Statement createStmt = serverConn.createStatement()) {
+                        createStmt.executeUpdate(createDbSql);
+                        plugin.getLogger().info("Created database: " + database);
+                    }
+                } else {
+                    plugin.getLogger().info("Database " + database + " already exists");
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to check or create database: " + e.getMessage(), e);
+            throw e;
+        }
+
+        // Step 3: Connect to the specific database
+        if (dbType.equals("mysql")) {
+            url = String.format("jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true", host, port, database);
+        } else {
+            url = String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
+        }
 
         try {
             connection = DriverManager.getConnection(url, username, password);
-            plugin.getLogger().info("Successfully connected to PostgreSQL database");
+            plugin.getLogger().info("Successfully connected to " + dbType + " database");
         } catch (SQLException e) {
-            plugin.getLogger().log(Level.SEVERE, "Failed to connect to PostgreSQL database: " + e.getMessage(), e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to connect to " + dbType + " database: " + e.getMessage(), e);
             throw e;
         }
 

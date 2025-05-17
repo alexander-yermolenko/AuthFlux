@@ -47,8 +47,8 @@ public class AuthListener implements Listener {
         player.teleport(spawnPoint);
 
         // Freeze player
-        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 128, false, false));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, Integer.MAX_VALUE, 128, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 128, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 128, false, false));
 
         if (!dbManager.isPlayerRegistered(player.getUniqueId().toString())) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(plugin.getMessagesConfig().getString("join-new-player"))));
@@ -73,8 +73,6 @@ public class AuthListener implements Listener {
             } else {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(plugin.getMessagesConfig().getString("move-not-logged-in"))));
             }
-        } else {
-            plugin.getLogger().info("Movement allowed for " + player.getName() + " (logged in)");
         }
     }
 
