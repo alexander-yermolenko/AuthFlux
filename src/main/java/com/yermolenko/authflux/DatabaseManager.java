@@ -136,15 +136,17 @@ public class DatabaseManager {
         }
     }
 
-    public void registerPlayer(String uuid, String username, String password) {
+    public boolean registerPlayer(String uuid, String username, String password) {
         String sql = "INSERT INTO players (uuid, username, password) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, uuid);
             stmt.setString(2, username);
             stmt.setString(3, BCrypt.hashpw(password, BCrypt.gensalt()));
             stmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Error registering player: " + e.getMessage(), e);
+            return false;
         }
     }
 
@@ -164,14 +166,16 @@ public class DatabaseManager {
         }
     }
 
-    public void setPlayerLoggedIn(String uuid, boolean loggedIn) {
+    public boolean setPlayerLoggedIn(String uuid, boolean loggedIn) {
         String sql = "UPDATE players SET is_logged_in = ? WHERE uuid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setBoolean(1, loggedIn);
             stmt.setString(2, uuid);
             stmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Error updating player login status: " + e.getMessage(), e);
+            return false;
         }
     }
 

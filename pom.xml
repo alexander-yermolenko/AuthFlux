@@ -6,7 +6,7 @@
 
   <groupId>com.yermolenko</groupId>
   <artifactId>AuthFlux</artifactId>
-  <version>1.1</version>
+  <version>1.2</version>
   <packaging>jar</packaging>
 
   <name>AuthFlux</name>

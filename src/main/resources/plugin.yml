@@ -1,5 +1,5 @@
 name: AuthFlux
-version: '1.1'
+version: '1.2'
 main: com.yermolenko.authflux.AuthFlux
 api-version: '1.13'
 authors: [Alexander Yermolenko]
